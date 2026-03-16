@@ -1,12 +1,12 @@
-# PROJECT WORK IN PROGRESS
+# Dr.Docsis / PROJECT WORK IN PROGRESS
 
-These powershell scripts require iPerf3. Please download it from [iperf.fr](https://iperf.fr/) and place iperf3.exe and cygwin1.dll in the root folder!
+Dr.Docsis is a PowerShell-based utility designed for automated network performance testing and signal diagnostics using iperf3 to identify bottlenecks in DOCSIS cable segments.
+* These powershell scripts require iPerf3. Please download it from [iperf.fr](https://iperf.fr/) and place iperf3.exe and cygwin1.dll in the root folder!
+* Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
 
-Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
-
+<img src="https://i.imgur.com/eIxAfCj.png" alt="Beschreibung" width="1024">
 
 # The "Fragmentation-Collapse" Theory
-What is it?
 
 The Fragmentation-Collapse is a specific network failure pattern where a broadband connection appears "healthy" during idle times or simple tasks, but fundamentally breaks down the moment it handles real-world data loads.
 
@@ -34,4 +34,4 @@ The Single-Stream Drift: We compare a single data stream against ten parallel st
 The goal of this project is to move the conversation with the ISP away from "my internet feels slow" toward "here is the physical proof that your infrastructure cannot handle fragmented traffic due to Layer 1 instability.
 
 
-<img src="https://i.imgur.com/eIxAfCj.png" alt="Beschreibung" width="1024">
+
