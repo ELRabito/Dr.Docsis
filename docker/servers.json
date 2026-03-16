@@ -1,0 +1,10 @@
+[
+    {"country": "Germany", "host": "fra.speedtest.clouvider.net", "ports": [5200, 5201, 5202, 5203, 5204, 5205, 5206, 5207, 5208, 5209]},
+    {"country": "Germany", "host": "speedtest.wtnet.de", "ports": [5200, 5201, 5202, 5203, 5204, 5205, 5206, 5207, 5208, 5209]},
+    {"country": "Switzerland", "host": "speedtest.iway.ch", "ports": [5201]},
+    {"country": "Switzerland", "host": "speedtest.shinternet.ch", "ports": [5200, 5201, 5202, 5203, 5204, 5205, 5206, 5207, 5208, 5209]},
+    {"country": "France", "host": "ping.online.net", "ports": [5200, 5201, 5202, 5203, 5204, 5205, 5206, 5207, 5208, 5209]},
+    {"country": "Netherlands", "host": "iperf-ams-nl.eranium.net", "ports": [5201, 5202, 5203, 5204, 5205, 5206, 5207, 5208, 5209, 5210]},
+    {"country": "Denmark", "host": "speed1.fiberby.dk", "ports": [9201, 9202, 9203, 9204, 9205]},
+    {"country": "Norway", "host": "lg.gigahost.no", "ports": [9201, 9202, 9203, 9204, 9205]}
+]
