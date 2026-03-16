@@ -24,8 +24,6 @@ CONTRACT_UP = float(os.environ.get("CONTRACT_UP_MBIT", "50"))
 SLA_PERCENT = float(os.environ.get("SLA_PERCENT", "90"))
 TEST_DURATION = int(os.environ.get("TEST_DURATION", "15"))
 
-Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
-
 _servers = []
 _last_result = None
 _running = False
@@ -45,6 +43,8 @@ def _load_servers():
 def _pick_server():
     if not _servers:
         _load_servers()
+    if not _servers:
+        return None, None
     server = random.choice(_servers)
     port = random.choice(server["ports"])
     return server, port
@@ -95,6 +95,9 @@ def run_test():
     _running = True
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     server, port = _pick_server()
+    if server is None:
+        _running = False
+        return {"error": "no iperf3 servers available", "timestamp": ts}
     host = server["host"]
     country = server["country"]
     dl_bw = f"{int(CONTRACT_DOWN * SLA_PERCENT / 100)}M"
@@ -229,6 +232,7 @@ def health():
 
 
 if __name__ == "__main__":
+    Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
     _load_servers()
     port = int(os.environ.get("PORT", "8780"))
     app.run(host="0.0.0.0", port=port)
