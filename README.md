@@ -31,8 +31,7 @@ The Single-Stream Drift: We compare a single data stream against ten parallel st
 
 # The Goal
 
-The goal of this project is to move the conversation with the ISP away from "my internet feels slow" toward "here is the physical proof that your infrastructure cannot handle fragmented traffic due to Layer 1 instability."
-
+The goal of this project is to move the conversation with the ISP away from "my internet feels slow" toward "here is the physical proof that your infrastructure cannot handle fragmented traffic due to Layer 1 instability.
 
 
 <img src="https://i.imgur.com/eIxAfCj.png" alt="Beschreibung" width="1024">
