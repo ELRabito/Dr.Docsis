@@ -1,4 +1,10 @@
-The "Fragmentation-Collapse" Theory
+# PROJECT WORK IN PROGRESS
+
+These powershell scripts requires iPerf3. Please download it from iperf.fr and place iperf3.exe and cygwin1.dll in the root folder!
+Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
+
+
+# The "Fragmentation-Collapse" Theory
 What is it?
 
 The Fragmentation-Collapse is a specific network failure pattern where a broadband connection appears "healthy" during idle times or simple tasks, but fundamentally breaks down the moment it handles real-world data loads.
@@ -12,7 +18,7 @@ Most speedtests and "ping" monitors use small, non-fragmented packets.
 
     The Multi-Stream Bias: Modern speedtests open many parallel connections. If one packet is lost, others keep moving. This hides the fact that the protocol overhead is massive and the signal integrity is actually poor.
 
-How Dr. Docsis proves the defect
+# How Dr. Docsis proves the defect
 
 This tool uses a "Stress-Logic" that targets the physical weaknesses of the cable infrastructure:
 
@@ -22,6 +28,6 @@ This tool uses a "Stress-Logic" that targets the physical weaknesses of the cabl
 
     The Single-Stream Drift: We compare a single data stream against ten parallel streams. If the single stream collapses while the multi-stream "brute-forces" its way to the target speed, it is a definitive proof of Signal Jitter and Packet Reordering—both symptoms of a physical hardware defect in the ISP's segment.
 
-The Goal
+# The Goal
 
 The goal of this project is to move the conversation with the ISP away from "my internet feels slow" toward "here is the physical proof that your infrastructure cannot handle fragmented traffic due to Layer 1 instability."
