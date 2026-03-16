@@ -1,6 +1,7 @@
 # PROJECT WORK IN PROGRESS
 
-These powershell scripts requires iPerf3. Please download it from [iperf.fr](https://iperf.fr/) and place iperf3.exe and cygwin1.dll in the root folder!
+These powershell scripts require iPerf3. Please download it from [iperf.fr](https://iperf.fr/) and place iperf3.exe and cygwin1.dll in the root folder!
+
 Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
 
 
