@@ -15,19 +15,19 @@ Why standard tests fail to detect it
 
 Most speedtests and "ping" monitors use small, non-fragmented packets.
 
-    The "Pulse" Fallacy: A simple Ping is small enough to fit within the standard MTU (Maximum Transmission Unit). It "dodges" the instability, leading the ISP to claim the line is fine.
+The "Pulse" Fallacy: A simple Ping is small enough to fit within the standard MTU (Maximum Transmission Unit). It "dodges" the instability, leading the ISP to claim the line is fine.
 
-    The Multi-Stream Bias: Modern speedtests open many parallel connections. If one packet is lost, others keep moving. This hides the fact that the protocol overhead is massive and the signal integrity is actually poor.
+The Multi-Stream Bias: Modern speedtests open many parallel connections. If one packet is lost, others keep moving. This hides the fact that the protocol overhead is massive and the signal integrity is actually poor.
 
 # How Dr. Docsis proves the defect
 
 This tool uses a "Stress-Logic" that targets the physical weaknesses of the cable infrastructure:
 
-    Forced Fragmentation: By sending UDP packets slightly larger than the standard 1500-byte limit (e.g., 1473 bytes of payload + headers), we force the network stack to split the data.
+Forced Fragmentation: By sending UDP packets slightly larger than the standard 1500-byte limit (e.g., 1473 bytes of payload + headers), we force the network stack to split the data.
 
-    The Integrity Trap: If a line has a high Bit Error Rate (BER), there is a statistical certainty that at least one fragment will be corrupted. Because a fragmented packet can only be reassembled if 100% of its parts arrive intact, the entire logical packet is dropped.
+The Integrity Trap: If a line has a high Bit Error Rate (BER), there is a statistical certainty that at least one fragment will be corrupted. Because a fragmented packet can only be reassembled if 100% of its parts arrive intact, the entire logical packet is dropped.
 
-    The Single-Stream Drift: We compare a single data stream against ten parallel streams. If the single stream collapses while the multi-stream "brute-forces" its way to the target speed, it is a definitive proof of Signal Jitter and Packet Reordering—both symptoms of a physical hardware defect in the ISP's segment.
+The Single-Stream Drift: We compare a single data stream against ten parallel streams. If the single stream collapses while the multi-stream "brute-forces" its way to the target speed, it is a definitive proof of Signal Jitter and Packet Reordering—both symptoms of a physical hardware defect in the ISP's segment.
 
 # The Goal
 
