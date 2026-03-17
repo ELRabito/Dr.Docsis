@@ -79,6 +79,9 @@ function Run-IperfTest {
     $paddedLabel = " > $($Label)...".PadRight(40, ".")
     Write-Host $paddedLabel -NoNewline
     
+    # FORCE CLOSE iPerf3 IN CASE OF A FREEZE / HANG
+    Get-Process iperf3 -ErrorAction SilentlyContinue | Stop-Process -Force
+    
     $argList = $ArgString.Split(" ") + @("--logfile", $LogFile)
     
     try {
