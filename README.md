@@ -2,6 +2,7 @@
 
 Dr.Docsis is a PowerShell-based utility designed for automated network performance testing and signal diagnostics using iperf3 to identify bottlenecks in DOCSIS cable segments.
 * These powershell scripts require iPerf3. Please download it from [iperf.fr](https://iperf.fr/) and place iperf3.exe and cygwin1.dll in the root folder!
+  "iPerf3 is a tool for active measurements of the maximum achievable bandwidth on IP networks. It supports tuning of various parameters related to timing, buffers and protocols (TCP, UDP, SCTP with IPv4 and IPv6). For each test it reports the bandwidth, loss, and other parameters."
 * Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
 
 <img src="https://i.imgur.com/eIxAfCj.png" alt="Beschreibung" width="1024">
