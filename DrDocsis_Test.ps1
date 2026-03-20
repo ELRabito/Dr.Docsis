@@ -48,6 +48,7 @@ if (-not (Test-Path $logPath)) { New-Item -ItemType Directory -Path $logPath -Fo
 $duration = 30           # iPerf standard for steady state
 $pauseBetweenRuns = 60   # Cool-down
 $retryPause = 60         # Wait on busy
+$debugKeepLogs = $false  # TOGGLE: Set to $true to keep logs even if a run fails/is incomplete
 
 $dlMbit = $contractDownMbit * ($slaPercent / 100)
 $upMbit = $contractUpMbit * ($slaPercent / 100)
@@ -79,14 +80,23 @@ function Run-IperfTest {
     $paddedLabel = " > $($Label)...".PadRight(40, ".")
     Write-Host $paddedLabel -NoNewline
     
-    # FORCE CLOSE iPerf3 IN CASE OF A FREEZE / HANG
+    # Force close iPerf3 in case of process hangs
     Get-Process iperf3 -ErrorAction SilentlyContinue | Stop-Process -Force
     
     $argList = $ArgString.Split(" ") + @("--logfile", $LogFile)
     
-    try {
+   try {
+	   
         $p = Start-Process -FilePath ".\iperf3.exe" -ArgumentList $argList -PassThru -NoNewWindow -ErrorAction Stop
-        $null = $p.WaitForExit(($duration + 20) * 1000)
+        
+        # Wait for run end (duration + 20 seconds)
+        $completed = $p.WaitForExit(($duration + 20) * 1000)
+        
+        if (-not $completed) {
+            Write-Host " TIMEOUT (Force Kill)" -ForegroundColor Magenta
+            $p | Stop-Process -Force
+            return $false  # Test failed
+        }
     } catch {
         Write-Host " ERROR: Execution failed!" -ForegroundColor Red
         return $false
@@ -96,7 +106,15 @@ function Run-IperfTest {
     
     if (Test-Path $LogFile) {
         $content = Get-Content $LogFile -Raw
-        if ($content -match "Usage:" -or $content -match "error" -or $content -match "busy" -or (Get-Item $LogFile).Length -lt 500) {
+        
+        # Detect server busy state
+        if ($content -match "busy") {
+            Write-Host " BUSY (Server)" -ForegroundColor Yellow
+            return $false
+        }
+
+        # General Error check, if log doesn't increase in size, test is failed.
+        if ($content -match "Usage:" -or $content -match "error" -or (Get-Item $LogFile).Length -lt 500) {
             Write-Host " FAILED" -ForegroundColor Red
             return $false
         }
@@ -129,7 +147,7 @@ while($true) {
         $runValid = $false
     }
 
-    # 2. Download (Multi-Stream) - Beweis für Server-Kapazität
+    # 2. Download (Multi-Stream) - Validate server capacity
     if ($runValid -and -not (Run-IperfTest "-c $server -p $port -t $duration -R -P 10" $logMulti "DL (TCP-Multi-10)")) {
         $runValid = $false
     }
@@ -144,15 +162,19 @@ while($true) {
         $runValid = $false
     }
 
-    # CLEANUP ODER WAIT
+    # Cleanup and Wait
     if (-not $runValid) {
-        Write-Host "Run incomplete. Deleting fragment logs..." -ForegroundColor DarkGray
-        foreach ($f in $currentLogs) { if (Test-Path $f) { Remove-Item $f -Force } }
+        if (-not $debugKeepLogs) {
+            Write-Host "Run incomplete. Deleting fragment logs..." -ForegroundColor DarkGray
+            foreach ($f in $currentLogs) { if (Test-Path $f) { Remove-Item $f -Force } }
+        } else {
+            Write-Host "Run incomplete. DEBUG: Keeping logs as requested." -ForegroundColor Magenta
+        }
         
         Write-Host "Retrying in $retryPause s..." -ForegroundColor DarkGray
         Start-Sleep -Seconds $retryPause
     } else {
-        # Countdown für den nächsten Run
+        # Countdown for the next run
         for ($i = $pauseBetweenRuns; $i -gt 0; $i--) {
             Write-Host "`rCycle complete. Next test in $i s...    " -ForegroundColor DarkGray -NoNewline
             Start-Sleep -Seconds 1
@@ -160,6 +182,6 @@ while($true) {
         Write-Host ("`r" + (" " * 60) + "`r") -NoNewline
     }
 
-    # Nächster Server aus der iPerf3_Host_Config.ps1
+    # Next Server from iPerf3_Host_Config.ps1
     $targetIndex = ($targetIndex + 1) % $targets.Count
 }
