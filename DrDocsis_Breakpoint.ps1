@@ -39,7 +39,7 @@ Write-Host "    Session: $sessionTimestamp | Goal: 3 Validated Cycles" -Foregrou
 Write-Host "===================================================================================" -ForegroundColor Cyan
 Write-Host "    TEST METHODOLOGY & BREAKPOINT DETECTION:" -ForegroundColor DarkGreen
 Write-Host "    * STEP-UP: Iterative bandwidth scaling to find physical limits." -ForegroundColor Gray
-Write-Host "    * UDP-STRESS: Using 1473B payload to trigger fragmentation/FEC load." -ForegroundColor Gray
+Write-Host "    * UDP-STRESS: Using 1473B payload to trigger packet fragmentation." -ForegroundColor Gray
 Write-Host "    * BREAKPOINT: First instance of >0.1% loss defines the line's ceiling." -ForegroundColor Gray
 Write-Host "    * DYNAMIC: 5M increments until loss, then 10M stress steps." -ForegroundColor Gray
 Write-Host "===================================================================================" -ForegroundColor Cyan
@@ -82,6 +82,14 @@ while ($successfulCycles -lt 3) {
 
         if (Test-Path $logFile) {
             $content = Get-Content $logFile -Raw
+            
+			# Detect server busy state
+            if ($content -match "busy") {
+                Write-Host " BUSY (Server)" -ForegroundColor Yellow
+                $isAllValid = $false
+                break
+            }
+
             if ($content -match "(\d+)/(\d+)\s+\(([\d\.]+)%\)") {
                 $loss = [double]$matches[3]
                 $color = "Green"; if ($loss -gt 0.1) { $color = "Yellow" }; if ($loss -gt 15) { $color = "Red" }
@@ -90,10 +98,10 @@ while ($successfulCycles -lt 3) {
                 if ($loss -gt 0.1 -and -not $hasDetectedLoss) {
                     $hasDetectedLoss = $true
                     $firstLossAt = $currentBW
-                    Write-Host "        (!) Point of Failure detected at $($currentBW)M" -ForegroundColor Gray
+                    Write-Host "         (!) Point of Failure detected at $($currentBW)M" -ForegroundColor Gray
                 }
             } else {
-                Write-Host " SERVER BUSY / ERROR" -ForegroundColor Red
+                Write-Host " ERROR (Log Content)" -ForegroundColor Red
                 $isAllValid = $false; break 
             }
         } else { $isAllValid = $false; break }
