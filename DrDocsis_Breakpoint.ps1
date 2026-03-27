@@ -39,7 +39,7 @@ Write-Host "    Session: $sessionTimestamp | Goal: 3 Validated Cycles" -Foregrou
 Write-Host "===================================================================================" -ForegroundColor Cyan
 Write-Host "    TEST METHODOLOGY & BREAKPOINT DETECTION:" -ForegroundColor DarkGreen
 Write-Host "    * STEP-UP: Iterative bandwidth scaling to find physical limits." -ForegroundColor Gray
-Write-Host "    * UDP-STRESS: Using 1473B payload to trigger packet fragmentation." -ForegroundColor Gray
+Write-Host "    * UDP-STRESS: Using 1474B payload to trigger packet fragmentation." -ForegroundColor Gray
 Write-Host "    * BREAKPOINT: First instance of >0.1% loss defines the line's ceiling." -ForegroundColor Gray
 Write-Host "    * DYNAMIC: 5M increments until loss, then 10M stress steps." -ForegroundColor Gray
 Write-Host "===================================================================================" -ForegroundColor Cyan
@@ -69,7 +69,7 @@ while ($successfulCycles -lt 3) {
         Write-Host "    Testing $($currentBW) Mbit/s ".PadRight(30) -NoNewline -ForegroundColor Yellow
         Write-Host "................ " -NoNewline -ForegroundColor DarkGray
 
-        $args = "-c $server -p $port -u -b $($currentBW)M -l 1473 -t $duration --get-server-output --logfile $logFile"
+        $args = "-c $server -p $port -u -b $($currentBW)M -l 1474 -t $duration --get-server-output --logfile $logFile"
         $p = Start-Process -FilePath ".\iperf3.exe" -ArgumentList $args -PassThru -NoNewWindow
         
         # Timeout safety (Duration + 10s buffer)
