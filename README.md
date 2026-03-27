@@ -13,28 +13,39 @@ Dr.Docsis is a PowerShell-based utility designed for automated network performan
 
 The Fragmentation-Collapse is a specific network failure pattern where a broadband connection appears "healthy" during idle times or simple tasks, but fundamentally breaks down the moment it handles real-world data loads.
 
-It occurs when the physical line (Layer 1) is so degraded that it can no longer support the reassembly of fragmented data packets. In DOCSIS (Cable) networks, this is usually caused by Upstream Ingress (external noise leaking into the cable) or failing distribution amplifiers.
-Why standard tests fail to detect it
+In DOCSIS (Cable) networks, this is usually caused by Upstream Ingress (external noise leaking into the cable), failing distribution amplifiers, or severely overbooked segments.
 
-Most speedtests and "ping" monitors use small, non-fragmented packets.
+# Why standard tests fail to detect it
+Most speedtests and "ping" monitors use small, non-fragmented packets and aggressive multi-streaming.
 
-The "Pulse" Fallacy: A simple Ping is small enough to fit within the standard MTU (Maximum Transmission Unit). It "dodges" the instability, leading the ISP to claim the line is fine.
-
-The Multi-Stream Bias: Modern speedtests open many parallel connections. If one packet is lost, others keep moving. This hides the fact that the protocol overhead is massive and the signal integrity is actually poor.
+* The "Pulse" Fallacy: A simple Ping is small enough to fit within the standard MTU (Maximum Transmission Unit). It "dodges" the instability, leading the ISP to claim the line is fine.
+* The Multi-Stream Bias: Modern speedtests open many parallel connections. If one packet is lost, others keep moving. This hides massive protocol overhead and poor signal integrity.
+* The L4-Invisibility: Standard tools don't report Retransmissions or TCP Window Scaling. They show you the "arrival speed" but not the "struggle" it took to get there.
 
 # How Dr. Docsis proves the defect
 
-This tool uses a "Stress-Logic" that targets the physical weaknesses of the cable infrastructure:
+This tool uses a "Stress-Logic" that targets the physical and protocol-level weaknesses of the infrastructure:
 
-Forced Fragmentation: By sending UDP packets slightly larger than the standard 1500-byte limit (e.g., 1473 bytes of payload + headers), we force the network stack to split the data.
+# 1. Forced Fragmentation (The Integrity Trap)
+By sending UDP packets slightly larger than the standard payload limits (e.g., 1474 bytes + headers), we force the network stack to split data. If a line has a high Bit Error Rate (BER), it is a statistical certainty that at least one fragment will be corrupted. Since a fragmented packet only reassembles if 100% of its parts arrive intact, the entire logical packet is dropped. This reveals "hidden" packet loss that a standard Ping never sees.
 
-The Integrity Trap: If a line has a high Bit Error Rate (BER), there is a statistical certainty that at least one fragment will be corrupted. Because a fragmented packet can only be reassembled if 100% of its parts arrive intact, the entire logical packet is dropped.
+# 2. Single-Stream Drift (L2 Instability)
 
-The Single-Stream Drift: We compare a single data stream against ten parallel streams. If the single stream collapses while the multi-stream "brute-forces" its way to the target speed, it is a definitive proof of Signal Jitter and Packet Reordering—both symptoms of a physical hardware defect in the ISP's segment.
+We compare a single data stream (TCP-S) against ten parallel streams (TCP-M). If the single stream collapses while the multi-stream "brute-forces" its way to the target speed, it is definitive proof of Signal Jitter and Packet Reordering—both symptoms of a physical hardware defect in the ISP's segment.
+
+# 3. TCP Window Strangulation (CWND Evidence)
+
+Dr. Docsis tracks the Congestion Window (CWND). A healthy line shows steady window scaling. A defective line shows a "Panic-Sawtooth" pattern:
+
+* The CWND collapses (e.g., down to 6K or 56K) because the TCP stack detects instability and pulls the emergency brake.
+* This proves the "slowness" isn't a software issue, but a direct consequence of the transport layer's inability to trust the physical line.
+
+# 4. The Retransmission-Chain (L4 Overhead)
+
+By logging TCP Retransmits, Dr. Docsis exposes how much of your bandwidth is "ghost-traffic." Seeing hundreds of retransmits during a 30-second test proves that the modem is stuck in a loop of re-requesting lost data, making the connection feel "laggy" even if the raw Mbit/s seem high.
 
 # The Goal
 
-The goal of this project is to move the conversation with the ISP away from "my internet feels slow" toward "here is the physical proof that your infrastructure cannot handle fragmented traffic due to Layer 1 instability.
-
+The goal of this project is to move the conversation with the ISP away from "my internet feels slow" toward "here is the forensic proof that your infrastructure cannot handle fragmented traffic or maintain TCP window stability due to Layer 1 instability.
 
 
