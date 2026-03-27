@@ -7,7 +7,7 @@ Dr.Docsis is a PowerShell-based utility designed for automated network performan
     
 * Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
 
-<img src="https://i.imgur.com/eIxAfCj.png" alt="Beschreibung" width="1024">
+<img src="https://i.imgur.com/9SqAcis.png" alt="Beschreibung" width="1024">
 
 # The "Fragmentation-Collapse" Theory
 
