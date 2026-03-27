@@ -142,13 +142,13 @@ while($true) {
 
     $runValid = $true
 
-    # 1. Download (Single-Stream)
-    if (-not (Run-IperfTest "-c $server -p $port -t $duration -R" $logDown "DL (TCP-Single)")) {
-        $runValid = $false
-    }
+    # 1. Download (Single-Stream) - With Server-Output for CWND/Congestion-Analyse
+	if (-not (Run-IperfTest "-c $server -p $port -t $duration -R --get-server-output" $logDown "DL (TCP-Single)")) {
+		$runValid = $false
+	}
 
     # 2. Download (Multi-Stream) - Validate server capacity
-    if ($runValid -and -not (Run-IperfTest "-c $server -p $port -t $duration -R -P 10" $logMulti "DL (TCP-Multi-10)")) {
+    if ($runValid -and -not (Run-IperfTest "-c $server -p $port -t $duration -R -P 10 --get-server-output" $logMulti "DL (TCP-Multi-10)")) {
         $runValid = $false
     }
 
