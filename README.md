@@ -35,7 +35,8 @@ We compare a single data stream (TCP-S) against ten parallel streams (TCP-M). If
 
 # 3. TCP Window Strangulation (CWND Evidence)
 
-Dr. Docsis tracks the Congestion Window (CWND). A healthy line shows steady window scaling. A defective line shows a "Panic-Sawtooth" pattern:
+Dr. Docsis tracks the Congestion Window (CWND). A healthy line shows steady window scaling. 
+A defective line shows a "Panic-Sawtooth" pattern:
 
 * The CWND collapses (e.g., down to 6K or 56K) because the TCP stack detects instability and pulls the emergency brake.
 * This proves the "slowness" isn't a software issue, but a direct consequence of the transport layer's inability to trust the physical line.
