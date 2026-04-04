@@ -53,9 +53,8 @@ Set-ExecutionPolicy RemoteSigned -Scope Process
 # Detects FEC problems due to ingress or segment congestion (over load).
 .\DrDocsis_Breakpoint.ps1
 
-#### 5 - Manual replication of the automated scripts to verify authencity
 #########################################################################
-5 - Manual replication of the automated scripts to verify authenticity
+# 5 - Manual replication of the automated scripts to verify authenticity
 #########################################################################
 
 # Initial idea to prove the problem automatically
