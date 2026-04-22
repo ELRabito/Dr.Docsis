@@ -21,7 +21,8 @@ Server List https://iperf3serverlist.net/
 
 # 2 - Execute the DrDocsis_Test.ps1 
 
-    Parameters UPLOAD DOWNLOAD CONTRACT_MINIMUM (eg. 100mbit 50mbit 90% Legal Minimum)
+Parameters UPLOAD DOWNLOAD CONTRACT_MINIMUM (eg. 100mbit 50mbit 90% Legal Minimum)
+
     .\DrDocsis_Test.ps1 100 50 90
 
 # 3 - Execute the DrDocsis_Analyze.ps1 in a second powershell window (Also allow script execution with the prompt from the start).
