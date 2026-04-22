@@ -66,13 +66,19 @@ while ($successfulCycles -lt 3) {
         $logFile = Join-Path $sessionPath "TEMP_C$($successfulCycles)_$($currentBW)M.txt"
         $currentSessionLogs += $logFile
         
+        # Getrennte Dateien für stdout/stderr zur Vermeidung des "same input" Fehlers
+        $outTrash = Join-Path $sessionPath "out_$($currentBW).tmp"
+        $errTrash = Join-Path $sessionPath "err_$($currentBW).tmp"
+
         Write-Host "    Testing $($currentBW) Mbit/s ".PadRight(30) -NoNewline -ForegroundColor Yellow
         Write-Host "................ " -NoNewline -ForegroundColor DarkGray
 
-        $args = "-c $server -p $port -u -b $($currentBW)M -l 1474 -t $duration --get-server-output --logfile $logFile"
-        $p = Start-Process -FilePath ".\iperf3.exe" -ArgumentList $args -PassThru -NoNewWindow
+        # -q wurde entfernt, da die Hilfe-Ausgabe zeigt, dass es nicht unterstützt wird
+        $args = "-c $server -p $port -u -b $($currentBW)M -l 1474 -t $duration --get-server-output --logfile `"$logFile`""
         
-        # Timeout safety (Duration + 10s buffer)
+        # Start-Process mit explizit unterschiedlichen Trash-Files
+        $p = Start-Process -FilePath ".\iperf3.exe" -ArgumentList $args -PassThru -NoNewWindow -RedirectStandardOutput $outTrash -RedirectStandardError $errTrash
+        
         if (-not $p.WaitForExit(($duration + 10) * 1000)) {
             $p | Stop-Process -Force
             Write-Host " TIMEOUT (Killed)" -ForegroundColor Red
@@ -80,17 +86,20 @@ while ($successfulCycles -lt 3) {
             break
         }
 
+        # Aufräumen der temporären Trash-Files
+        if (Test-Path $outTrash) { Remove-Item $outTrash -Force }
+        if (Test-Path $errTrash) { Remove-Item $errTrash -Force }
+
         if (Test-Path $logFile) {
             $content = Get-Content $logFile -Raw
             
-			# Detect server busy state
             if ($content -match "busy") {
                 Write-Host " BUSY (Server)" -ForegroundColor Yellow
                 $isAllValid = $false
                 break
             }
 
-            if ($content -match "(\d+)/(\d+)\s+\(([\d\.]+)%\)") {
+            if ($content -match "(\d+)/(\d+)\s+\(([\d\.]+)%\)\s+receiver") {
                 $loss = [double]$matches[3]
                 $color = "Green"; if ($loss -gt 0.1) { $color = "Yellow" }; if ($loss -gt 15) { $color = "Red" }
                 Write-Host " LOSS: $loss%" -ForegroundColor $color
@@ -98,7 +107,7 @@ while ($successfulCycles -lt 3) {
                 if ($loss -gt 0.1 -and -not $hasDetectedLoss) {
                     $hasDetectedLoss = $true
                     $firstLossAt = $currentBW
-                    Write-Host "         (!) Point of Failure detected at $($currentBW)M" -ForegroundColor Gray
+                    Write-Host "          (!) Point of Failure detected at $($currentBW)M" -ForegroundColor Gray
                 }
             } else {
                 Write-Host " ERROR (Log Content)" -ForegroundColor Red
@@ -106,7 +115,6 @@ while ($successfulCycles -lt 3) {
             }
         } else { $isAllValid = $false; break }
 
-        # Adjust step size
         if ($hasDetectedLoss) { $currentBW += 10 } else { $currentBW += 5 }
         Start-Sleep -Seconds 1
     }
@@ -119,7 +127,8 @@ while ($successfulCycles -lt 3) {
                 $bwMatch = [regex]::Match($f, "(\d+)M\.txt").Groups[1].Value
                 $fileTime = Get-Date -Format "HH-mm-ss"
                 $finalName = "LOG_UP_UDP_$($server)_$($bwMatch)M_$($fileTime).txt"
-                Rename-Item -Path $f -NewName $finalName -Force 
+                $destPath = Join-Path $sessionPath $finalName
+                Move-Item -Path $f -Destination $destPath -Force 
             }
         }
         $usedHosts += $server
@@ -137,7 +146,7 @@ Write-Host "====================================================================
 Write-Host "    DR. DOCSIS FINAL VERDICT" -ForegroundColor White
 
 if ($breakpoints.Count -lt 3) {
-    Write-Warning "Incomplete data set ($($breakpoints.Count)/3 cycles). Cannot compute average."
+    Write-Warning "Incomplete data set. Cannot compute average."
     exit
 }
 
