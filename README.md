@@ -5,7 +5,7 @@ Dr.Docsis is a PowerShell-based utility designed for automated network performan
 
     "iPerf3 is a tool for active measurements of the maximum achievable bandwidth on IP networks. It supports tuning of various parameters related to timing, buffers and protocols (TCP, UDP, SCTP with IPv4 and IPv6). For each test it reports the bandwidth, loss, and other parameters."
     
-* Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/TUTORIAL_HOW_TO_USE.ps1
+* Then follow the steps in https://github.com/ELRabito/Dr.Docsis/blob/main/HOW_TO_USE.md
 
 <img src="https://i.imgur.com/9SqAcis.png" alt="Beschreibung" width="1024">
 
