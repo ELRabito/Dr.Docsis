@@ -1,4 +1,4 @@
-################### Powershell iperf3 stress test 
+# Powershell iperf3 stress test 
 
 Used hosts in this tests with port/port-range
 Server List https://iperf3serverlist.net/
