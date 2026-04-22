@@ -151,15 +151,30 @@ $report = $files | ForEach-Object {
             [PSCustomObject]@{ Time = $_.CreationTime.ToString("MM-dd HH:mm"); RawTime = $_.CreationTime; Type = "UL-TCP-S"; Target = $hostname; Val = $bw; Result = "$bw".PadLeft(5); Max = $contractUp; Visual = "[$(Get-ProgressBar $bw $contractUp)]"; IsError = ($bw -lt ($contractUp * $legalLimit)); FullPath = $_.FullName; Retr = $null; Cwnd = $null; CwndDisplay = "" }
         }
     }
-    elseif ($filename -like "*LOG_UDP_FRAG*") {
-		
-        $stats = $content -split "`n" | Select-String -Pattern "(\d+)/(\d+)\s+\(([\d\.]+)%\).*receiver"
-        $jitterMatch = $content | Select-String -Pattern "([\d\.]+)\s+ms\s+(\d+)/(\d+)" | Select-Object -Last 1
+   elseif ($filename -like "*LOG_UDP_FRAG*") {
+
+        $logLines = $content -split "`n"
+        $receiverLine = $logLines | Select-String -Pattern "\(([\d\.]+)%\).*receiver" | Select-Object -Last 1
         
-        if ($stats) {
-            $loss = [double]$stats.Matches.Groups[3].Value
-            $jitter = if ($jitterMatch) { $jitterMatch.Matches.Groups[1].Value } else { "N/A" }
-            $lossBar = ("!" * [int]([math]::Min($loss/5, 20))) + ("." * (20 - [int]([math]::Min($loss/5, 20))))
+        if (-not $receiverLine) {
+            $receiverLine = $logLines | Select-String -Pattern "\(([\d\.]+)%\)" | Select-Object -Last 1
+        }
+
+        if ($receiverLine) {
+
+            if ($receiverLine -match "([\d\.]+)\s+ms\s+(\d+)/(\d+)\s+\(([\d\.]+)%\)") {
+                $jitter = $matches[1]
+                $loss = [double]$matches[4]
+            } 
+            elseif ($receiverLine -match "(\d+)/(\d+)\s+\(([\d\.]+)%\)") {
+                $loss = [double]$matches[3]
+                $jitterSearch = $content | Select-String -Pattern "([\d\.]+)\s+ms" -AllMatches
+                $jitter = if ($jitterSearch) { $jitterSearch.Matches | Select-Object -Last 1 | ForEach-Object { $_.Groups[1].Value } } else { "0.000" }
+            }
+
+            $lossBarCount = [int]([math]::Min($loss/5, 20))
+            $lossBar = ("!" * $lossBarCount) + ("." * (20 - $lossBarCount))
+            
             [PSCustomObject]@{ 
                 Time = $_.CreationTime.ToString("MM-dd HH:mm"); 
                 RawTime = $_.CreationTime; 
@@ -167,9 +182,9 @@ $report = $files | ForEach-Object {
                 Target = $hostname; 
                 Val = $loss; 
                 Result = "$loss% Loss"; 
-                Max = $jitter; 
+                Max = $jitter;
                 Visual = "[$lossBar]"; 
-                IsError = ($loss -gt 5); 
+                IsError = ($loss -gt 2); 
                 FullPath = $_.FullName; 
                 Retr = $null;
                 Cwnd = $null;
