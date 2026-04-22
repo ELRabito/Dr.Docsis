@@ -83,11 +83,14 @@ function Run-IperfTest {
     # Force close iPerf3 in case of process hangs
     Get-Process iperf3 -ErrorAction SilentlyContinue | Stop-Process -Force
     
+    # Redirect standard output/error to temp files to keep console clean from MTU warnings
     $argList = $ArgString.Split(" ") + @("--logfile", $LogFile)
+    $tempOut = "$env:TEMP\iperf_stdout.tmp"
+    $tempErr = "$env:TEMP\iperf_stderr.tmp"
     
-   try {
-	   
-        $p = Start-Process -FilePath ".\iperf3.exe" -ArgumentList $argList -PassThru -NoNewWindow -ErrorAction Stop
+    try {
+        $p = Start-Process -FilePath ".\iperf3.exe" -ArgumentList $argList -PassThru -NoNewWindow -ErrorAction Stop `
+             -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr
         
         # Wait for run end (duration + 20 seconds)
         $completed = $p.WaitForExit(($duration + 20) * 1000)
@@ -95,7 +98,7 @@ function Run-IperfTest {
         if (-not $completed) {
             Write-Host " TIMEOUT (Force Kill)" -ForegroundColor Magenta
             $p | Stop-Process -Force
-            return $false  # Test failed
+            return $false
         }
     } catch {
         Write-Host " ERROR: Execution failed!" -ForegroundColor Red
@@ -113,7 +116,7 @@ function Run-IperfTest {
             return $false
         }
 
-        # General Error check, if log doesn't increase in size, test is failed.
+        # General Error check
         if ($content -match "Usage:" -or $content -match "error" -or (Get-Item $LogFile).Length -lt 500) {
             Write-Host " FAILED" -ForegroundColor Red
             return $false
@@ -142,12 +145,12 @@ while($true) {
 
     $runValid = $true
 
-    # 1. Download (Single-Stream) - With Server-Output for CWND/Congestion-Analyse
-	if (-not (Run-IperfTest "-c $server -p $port -t $duration -R --get-server-output" $logDown "DL (TCP-Single)")) {
-		$runValid = $false
-	}
+    # 1. Download (Single-Stream)
+    if (-not (Run-IperfTest "-c $server -p $port -t $duration -R --get-server-output" $logDown "DL (TCP-Single)")) {
+        $runValid = $false
+    }
 
-    # 2. Download (Multi-Stream) - Validate server capacity
+    # 2. Download (Multi-Stream)
     if ($runValid -and -not (Run-IperfTest "-c $server -p $port -t $duration -R -P 10 --get-server-output" $logMulti "DL (TCP-Multi-10)")) {
         $runValid = $false
     }
@@ -157,11 +160,11 @@ while($true) {
         $runValid = $false
     }
 
-    # 4. UDP Stress
+    # 4. UDP Stress (The Fragmentation Test)
     if ($runValid -and -not (Run-IperfTest "-c $server -p $port -u -b $upBandwidth -l 1474 -t $duration --get-server-output" $logFrag "UL (UDP-Frag)")) {
         $runValid = $false
     }
-
+    
     # Cleanup and Wait
     if (-not $runValid) {
         if (-not $debugKeepLogs) {
